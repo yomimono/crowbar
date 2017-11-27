@@ -254,18 +254,6 @@ and gen_apply :
        (res, exn * Printexc.raw_backtrace) result * unit printer list =
       fun size input gens -> match gens with
       | [] -> fun x -> Ok x, []
-<<<<<<< HEAD
-      | g :: gs -> fun f ->
-        let v, pv = generate size input g in
-        let res, pvs =
-          match f v with
-          | exception (BadTest _ as e) -> raise e
-          | exception e ->
-             Error (e, Printexc.get_raw_backtrace ()) , []
-          | fv -> go size input gs fv in
-        res, pv :: pvs in
-  let v, pvs = go size state gens f in
-=======
       | g :: gs ->
         if size < 0 then
           raise (BadTest "stack depth exceeded")
@@ -279,7 +267,6 @@ and gen_apply :
             | fv -> go (size - 1) input gs fv in
           res, pv :: pvs in
   let v, pvs = go (size - 1) state gens f in
->>>>>>> 93fd02e... bail out unconditionally when trying to apply over the size limit
   let pvs = fun ppf () ->
     match pvs with
     | [pv] ->
