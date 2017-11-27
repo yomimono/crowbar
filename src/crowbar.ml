@@ -237,8 +237,11 @@ and generate_list : type a . int -> state -> a gen -> (a * unit printer) list =
 
 and generate_list1 : type a . int -> state -> a gen -> (a * unit printer) list =
   fun size input gen ->
-  let ans = generate size input gen in
-  ans :: generate_list (size - 1) input gen
+    let ans = generate size input gen in
+    if size <= 1 then
+      ans :: []
+    else
+      ans :: generate_list (size - 1) input gen
 
 and gen_apply :
     type k res . int -> state ->
@@ -251,6 +254,7 @@ and gen_apply :
        (res, exn * Printexc.raw_backtrace) result * unit printer list =
       fun size input gens -> match gens with
       | [] -> fun x -> Ok x, []
+<<<<<<< HEAD
       | g :: gs -> fun f ->
         let v, pv = generate size input g in
         let res, pvs =
@@ -261,6 +265,21 @@ and gen_apply :
           | fv -> go size input gs fv in
         res, pv :: pvs in
   let v, pvs = go size state gens f in
+=======
+      | g :: gs ->
+        if size < 0 then
+          raise (BadTest "stack depth exceeded")
+        else fun f ->
+          let v, pv = generate (size - 1) input g in
+          let res, pvs =
+            match f v with
+            | exception (BadTest _ as e) -> raise e
+            | exception e ->
+              Error (e, Printexc.get_raw_backtrace ()) , []
+            | fv -> go (size - 1) input gs fv in
+          res, pv :: pvs in
+  let v, pvs = go (size - 1) state gens f in
+>>>>>>> 93fd02e... bail out unconditionally when trying to apply over the size limit
   let pvs = fun ppf () ->
     match pvs with
     | [pv] ->
