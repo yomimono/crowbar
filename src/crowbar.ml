@@ -223,7 +223,8 @@ let rec generate : type a . int -> state -> a gen -> a * unit printer =
 
 and generate_list : type a . int -> state -> a gen -> (a * unit printer) list =
   fun size input gen ->
-  if read_bool input then
+  if size <= 0 then []
+  else if read_bool input then
     generate_list1 size input gen
   else
     []
@@ -231,7 +232,7 @@ and generate_list : type a . int -> state -> a gen -> (a * unit printer) list =
 and generate_list1 : type a . int -> state -> a gen -> (a * unit printer) list =
   fun size input gen ->
   let ans = generate size input gen in
-  ans :: generate_list size input gen
+  ans :: generate_list (size - 1) input gen
 
 and gen_apply :
     type k res . int -> state ->
